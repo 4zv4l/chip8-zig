@@ -31,7 +31,10 @@ pub fn main() void {
 
     while (true) {
         // do one cycle
-        myChip8.emulateCycle();
+        myChip8.emulateCycle() catch |e| {
+            print("{e}\n", .{e});
+            return;
+        };
 
         // draw if needed
         if (myChip8.drawFlag) {
