@@ -114,15 +114,14 @@ pub const Chip8 = struct {
             // if rom too long abort :: max size for a rom is 3583-bits or 3,5kb
             if (i + 0x200 >= 0xFFF) return error.RomTooBig;
         }
-        print("size => {X}\n", .{0x200 + i});
     }
 
     /// emulate one cycle from the chip8
     /// read instruction from ram
     /// fetch => decode => execute
     /// update the Porgram Counter (PC) and the timers
-    pub fn emulateCycle(self: *Chip8) void {
-        // check Program Counter
+    pub fn emulateCycle(self: *Chip8) !void {
+        // check Program Counter, loop if max addr is reached
         if (self.PC >= 0xFFF) {
             self.PC = 0x200;
         }
@@ -136,7 +135,8 @@ pub const Chip8 = struct {
         const call = self.decode(self.opcode);
 
         // execute if call isn't 0 (not known opcode)
-        if (call.opcode != 0) self.execute(call);
+        if (call.opcode == 0) return error.UnknownOpcode;
+        self.execute(call);
 
         // update timers
         if (self.delay_timer > 0) {
@@ -172,21 +172,16 @@ pub const Chip8 = struct {
 
                     },
                     else => {
-                        print("opcode not known: 0x{x}\n", .{self.opcode});
+                        print("opcode not known: 0x{x} .. aborting\n", .{self.opcode});
+                        return Opcode_struct{ .opcode = 0 };
                     },
                 }
             },
             0xA000 => { // ANNN: Sets I to the address NNN
                 // return Opcode_struct{ .opcode = 21, .NNN = NNN };
             },
-            0x6000 => { // 6XNN: Sets V[X] to NN
-                // TODO
-                // const X: u8 = self.opcode;
-                // const NN: u8 = self.opcode;
-                // self.V[X] = NN;
-            },
             else => {
-                print("opcode not known: 0x{x}\n", .{self.opcode});
+                print("opcode not known: 0x{x} .. aborting\n", .{self.opcode});
                 return Opcode_struct{ .opcode = 0 };
             },
         }
