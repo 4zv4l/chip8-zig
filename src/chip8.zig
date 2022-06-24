@@ -1,6 +1,7 @@
 const std = @import("std");
 const fs = std.fs;
 const print = std.debug.print;
+
 // two bytes long opcode (16 bits)
 const Opcode = u16;
 
@@ -112,7 +113,29 @@ pub const Chip8 = struct {
         self.opcode = @as(u16, self.memory[self.PC]) << 8;
         self.opcode |= self.memory[self.PC + 1];
         print("fetched: 0x{x}\n", .{self.opcode});
-        // decode
+        // decode & execute
+        const call = self.decode(self.opcode);
+        // execute
+        self.execute(call);
+        // update timers
+        if (self.delay_timer > 0) {
+            self.delay_timer -= 1;
+        }
+        if (self.sound_timer > 0) {
+            if (self.sound_timer == 1) {
+                print("BEEP!\n", .{});
+            }
+            self.sound_timer -= 1;
+        }
+    }
+    pub fn setKeys(self: *Chip8) void {
+        _ = self;
+    }
+
+    /// decode opcode
+    /// return 36 if not known opcode
+    fn decode(self: *Chip8, opcode: Opcode) u8 {
+        _ = opcode;
         switch (self.opcode & 0xF000) {
 
             // some opcodes //
@@ -134,8 +157,7 @@ pub const Chip8 = struct {
             },
             0xA000 => { // ANNN: Sets I to the address NNN
                 // exec opcode
-                self.I = self.opcode & 0x0FFF;
-                self.PC += 2;
+                return 21;
             },
             0x6000 => { // 6XNN: Sets V[X] to NN
                 // TODO
@@ -145,20 +167,125 @@ pub const Chip8 = struct {
             },
             else => {
                 print("opcode not known: 0x{x}\n", .{self.opcode});
+                return 36;
             },
         }
-        // update timers
-        if (self.delay_timer > 0) {
-            self.delay_timer -= 1;
-        }
-        if (self.sound_timer > 0) {
-            if (self.sound_timer == 1) {
-                print("BEEP!\n", .{});
-            }
-            self.sound_timer -= 1;
-        }
+        return 36;
     }
-    pub fn setKeys(self: *Chip8) void {
+
+    /// execute opcode
+    fn execute(self: *Chip8, opcode: u8) void {
         _ = self;
+        switch (opcode) {
+            1 => { // 0NNN: call machine routine at addr NNN
+
+            },
+            2 => { // 00E0: clears the screen
+
+            },
+            3 => { // 00EE: return from subroutine
+
+            },
+            4 => { // 1NNN: jumps to addr NNN
+
+            },
+            5 => { // 2NNN: calls subroutine at NNN
+
+            },
+            6 => { // 3XNN: skips the next instruction if V[X] equals NN
+
+            },
+            7 => { // 4XNN: skips the next instruction if V[X] is not equal NN
+
+            },
+            8 => { // 5XY0: skips the next instruction if V[X] equals V[Y]
+
+            },
+            9 => { // 6XNN: sets V[X] to NN
+
+            },
+            10 => { // 7XNN: adds NN to V[X]
+
+            },
+            11 => { // 8XY0: setx V[X] to the value of V[Y]
+
+            },
+            12 => { // 8XY1: setx V[X] to V[X]|V[Y] (or bitwise)
+                // v[x] |= v[y]
+            },
+            13 => { // 8XY2: sets V[X] to V[X]&V[Y] (and bitwise)
+
+            },
+            14 => { // 8XY3: sets V[X] to V[X]^V[Y] (xor bitwise)
+
+            },
+            15 => { // 8XY4: adds V[Y] to V[X], VF is set to 1 if a carry or 0 if not
+                // v[x] += v[y]
+            },
+            16 => { // 8XY5: V[Y] is subtracted from V[X], VF is set to 0 when borrow and 1 if not
+
+            },
+            17 => { // 8XY6: stores the least significant bit of V[X] in VF and then shift V[X] to the right by 1
+                // Vx >>= 1
+
+            },
+            18 => { // 8XY7: sets V[X] to V[Y] minux V[X], VF is set to 0 when borrow and 1 if not
+                // Vx = Vy - Vx
+            },
+            19 => { // 8XYE: store the most significant bit of V[X] in VF and then shift V[X] to the left by 1
+                // Vx <<= 1
+
+            },
+            20 => { // 9XY0:
+
+            },
+            21 => { // ANNN:
+                self.I = self.opcode & 0x0FFF;
+                self.PC += 2;
+            },
+            22 => { // BNNN:
+
+            },
+            23 => { // CXNN:
+
+            },
+            24 => { // DXYN:
+
+            },
+            25 => { // EX9E:
+
+            },
+            26 => { // EXA1:
+
+            },
+            27 => { // FX07:
+
+            },
+            28 => { // FX0A:
+
+            },
+            29 => { // FX15:
+
+            },
+            30 => { // FX18:
+
+            },
+            31 => { // FX1E:
+
+            },
+            32 => { // FX29:
+
+            },
+            33 => { // FX33:
+
+            },
+            34 => { // FX55:
+
+            },
+            35 => { // FX65:
+
+            },
+            else => {},
+        }
     }
 };
