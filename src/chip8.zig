@@ -111,7 +111,7 @@ pub const Chip8 = struct {
             };
             self.memory[i + 0x200] = byte;
             i += 1;
-            // if rom too long abort :: max size for a rom is 3583-bits or 3,5kb
+            // if rom too long abort :: max size for a rom is 3583b or 3,5kb
             if (i + 0x200 >= 0xFFF) return error.RomTooBig;
         }
     }
