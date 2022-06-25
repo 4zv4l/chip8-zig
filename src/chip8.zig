@@ -99,7 +99,7 @@ pub const Chip8 = struct {
         print("=> {s}\n", .{abs_path});
 
         // try to open the file
-        const file = fs.openFileAbsolute(abs_path, .{ .mode = .read_only }) catch |e| {
+        const file = fs.openFileAbsolute(abs_path, .{ .read = true }) catch |e| {
             return e;
         };
         const reader = file.reader();
