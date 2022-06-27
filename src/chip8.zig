@@ -320,7 +320,6 @@ pub const Chip8 = struct {
             2 => { // 00E0: clears the screen
                 self.drawFlag = true;
                 self.gfx = std.mem.zeroes([64][32]u8);
-                self.PC += 2;
             },
             3 => { // 00EE: return from subroutine
 
@@ -333,69 +332,53 @@ pub const Chip8 = struct {
             },
             6 => { // 3XNN: skips the next instruction if V[X] equals NN
 
-                self.PC += 4;
             },
             7 => { // 4XNN: skips the next instruction if V[X] is not equal NN
 
-                self.PC += 4;
             },
             8 => { // 5XY0: skips the next instruction if V[X] equals V[Y]
 
-                self.PC += 4;
             },
             9 => { // 6XNN: sets V[X] to NN
 
-                self.PC += 2;
             },
             10 => { // 7XNN: adds NN to V[X]
 
-                self.PC += 2;
             },
             11 => { // 8XY0: setx V[X] to the value of V[Y]
 
-                self.PC += 2;
             },
             12 => { // 8XY1: setx V[X] to V[X]|V[Y] (or bitwise)
                 // v[x] |= v[y]
-                self.PC += 2;
             },
             13 => { // 8XY2: sets V[X] to V[X]&V[Y] (and bitwise)
 
-                self.PC += 2;
             },
             14 => { // 8XY3: sets V[X] to V[X]^V[Y] (xor bitwise)
 
-                self.PC += 2;
             },
             15 => { // 8XY4: adds V[Y] to V[X], VF is set to 1 if a carry or 0 if not
                 // v[x] += v[y]
-                self.PC += 2;
             },
             16 => { // 8XY5: V[Y] is subtracted from V[X], VF is set to 0 when borrow and 1 if not
 
-                self.PC += 2;
             },
             17 => { // 8XY6: stores the least significant bit of V[X] in VF and then shift V[X] to the right by 1
                 // Vx >>= 1
 
-                self.PC += 2;
             },
             18 => { // 8XY7: sets V[X] to V[Y] minux V[X], VF is set to 0 when borrow and 1 if not
                 // Vx = Vy - Vx
-                self.PC += 2;
             },
             19 => { // 8XYE: store the most significant bit of V[X] in VF and then shift V[X] to the left by 1
                 // Vx <<= 1
 
-                self.PC += 2;
             },
             20 => { // 9XY0: skips the next instruction if V[X] != V[Y]
 
-                self.PC += 4;
             },
             21 => { // ANNN: sets I to the addr NNN
                 self.I = self.opcode & 0x0FFF;
-                self.PC += 2;
             },
             22 => { // BNNN: jumps to the addr NNN + V[0], keep self.PC to the stack
 
@@ -403,57 +386,42 @@ pub const Chip8 = struct {
             23 => { // CXNN: sets V[X] to the result of a bitwise operation on a random number and NN
                 // Vx = rand() & NN
 
-                self.PC += 2;
             },
             24 => { // DXYN: draw sprite at coordinate (Vx, Vy) width 8px height of N px, each row of 8px is read as bit-cded starting from memory[I], VF is set to 1 if any screen pixels are flipped from set to unset and to 0 if it doesn't happen
 
-                self.PC += 2;
             },
             25 => { // EX9E: skips the next instruction if the key stored in V[X] is pressed
                 // if(key() == Vx)
 
-                self.PC += 4;
             },
             26 => { // EXA1: skips the next instruction if the key stored in V[X] is not pressed
                 // if(key() != Vx)
 
-                self.PC += 4;
             },
             27 => { // FX07: sets V[X] to the value of the delay timer
 
-                self.PC += 2;
             },
             28 => { // FX0A: A key press is awaited and then stored in V[X] (blocking)
 
-                self.PC += 2;
             },
             29 => { // FX15: sets the delay_timer to V[X]
 
-                self.PC += 2;
             },
             30 => { // FX18: sets the sound_timer to V[X]
 
-                self.PC += 2;
             },
             31 => { // FX1E: adds V[X] to I
                 // self.I += self.V[X]
-                self.PC += 2;
             },
             32 => { // FX29: sets I tot he location of the sprite for the char in V[X], char O-F (in hex) are represented by a 4x5 font
 
-                self.PC += 2;
             },
             33 => { // FX33:
 
-                self.PC += 2;
             },
             34 => { // FX55:
-
-                self.PC += 2;
             },
             35 => { // FX65:
-
-                self.PC += 2;
             },
             else => {},
         }
