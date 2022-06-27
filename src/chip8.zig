@@ -18,6 +18,8 @@ const Opcode_struct = struct {
     X: u4 = 0,
     Y: u4 = 0,
 
+    /// format the Opcode_struct to show the different
+    /// components
     pub fn show(self: Opcode_struct) void {
         print("{{opcode: {d}, N: {x}, NN: {x}, NNN: {x}, X: {d}, Y: {d}}}\n", .{ self.opcode, self.N, self.NN, self.NNN, self.X, self.Y });
     }
