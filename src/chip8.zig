@@ -142,7 +142,7 @@ pub const Chip8 = struct {
         print("0x{X:0>4} =>", .{self.opcode});
         opcode.show();
         self.PC += 2;
-        if (opcode.opcode == 35) {
+        if (opcode.opcode == 35) { // quit after 35 opcodes (to test the 'hex.content' rom)
             std.process.exit(0);
         }
 
