@@ -99,7 +99,7 @@ pub const Chip8 = struct {
         print("=> {s}\n", .{abs_path});
 
         // try to open the file
-        const file = fs.openFileAbsolute(abs_path, .{ .read = true }) catch |e| {
+        const file = fs.openFileAbsolute(abs_path, .{ .mode = .read_only }) catch |e| {
             return e;
         };
         const reader = file.reader();
@@ -149,6 +149,7 @@ pub const Chip8 = struct {
             self.sound_timer -= 1;
         }
     }
+
     pub fn setKeys(self: *Chip8) void {
         _ = self;
     }
@@ -158,27 +159,137 @@ pub const Chip8 = struct {
     fn decode(self: *Chip8, opcode: Opcode) Opcode_struct {
         _ = opcode;
         switch (self.opcode & 0xF000) {
+            0x0000 => switch (self.opcode & 0x000F) {
+                0x0000 => { // 00E0: clears the screen
+                    return Opcode_struct{ .opcode = 2 };
+                },
+                0x000E => { // 00EE: returns from subroutine
 
-            // some opcodes //
-            // TODO
-
-            0x0000 => {
-                // TODO
-                switch (self.opcode & 0x000F) {
-                    0x0000 => { // 00E0: Clear the screen
-
+                    return Opcode_struct{ .opcode = 3 };
+                },
+                else => { // 0NNN
+                    return Opcode_struct{ .opcode = 1 };
+                },
+            },
+            0x1000 => {
+                return Opcode_struct{ .opcode = 4 };
+            },
+            0x2000 => {
+                return Opcode_struct{ .opcode = 5 };
+            },
+            0x3000 => {
+                return Opcode_struct{ .opcode = 6 };
+            },
+            0x4000 => {
+                return Opcode_struct{ .opcode = 7 };
+            },
+            0x5000 => {
+                return Opcode_struct{ .opcode = 8 };
+            },
+            0x6000 => {
+                return Opcode_struct{ .opcode = 9 };
+            },
+            0x7000 => {
+                return Opcode_struct{ .opcode = 10 };
+            },
+            0x8000 => switch (self.opcode & 0x000F) {
+                0x0000 => {
+                    return Opcode_struct{ .opcode = 11 };
+                },
+                0x0001 => {
+                    return Opcode_struct{ .opcode = 12 };
+                },
+                0x0002 => {
+                    return Opcode_struct{ .opcode = 13 };
+                },
+                0x0003 => {
+                    return Opcode_struct{ .opcode = 14 };
+                },
+                0x0004 => {
+                    return Opcode_struct{ .opcode = 15 };
+                },
+                0x0005 => {
+                    return Opcode_struct{ .opcode = 16 };
+                },
+                0x0006 => {
+                    return Opcode_struct{ .opcode = 17 };
+                },
+                0x0007 => {
+                    return Opcode_struct{ .opcode = 18 };
+                },
+                0x000E => {
+                    return Opcode_struct{ .opcode = 19 };
+                },
+                else => {
+                    print("opcode not known: 0x{x} .. aborting\n", .{self.opcode});
+                    return Opcode_struct{ .opcode = 0 };
+                },
+            },
+            0x9000 => {
+                return Opcode_struct{ .opcode = 20 };
+            },
+            0xA000 => {
+                return Opcode_struct{ .opcode = 21 };
+            },
+            0xB000 => {
+                return Opcode_struct{ .opcode = 22 };
+            },
+            0xC000 => {
+                return Opcode_struct{ .opcode = 23 };
+            },
+            0xD000 => {
+                return Opcode_struct{ .opcode = 24 };
+            },
+            0xE000 => switch (self.opcode & 0x000F) {
+                0x000E => {
+                    return Opcode_struct{ .opcode = 25 };
+                },
+                0x0001 => {
+                    return Opcode_struct{ .opcode = 26 };
+                },
+                else => {
+                    print("opcode not known: 0x{x} .. aborting\n", .{self.opcode});
+                    return Opcode_struct{ .opcode = 0 };
+                },
+            },
+            0xF000 => switch (self.opcode & 0x000F) {
+                0x0003 => {
+                    return Opcode_struct{ .opcode = 33 };
+                },
+                0x0007 => {
+                    return Opcode_struct{ .opcode = 27 };
+                },
+                0x000A => {
+                    return Opcode_struct{ .opcode = 28 };
+                },
+                0x0005 => switch (self.opcode & 0x00F0) {
+                    0x0010 => {
+                        return Opcode_struct{ .opcode = 29 };
                     },
-                    0x000E => { // 00EE: Return from subroutine
-
+                    0x0050 => {
+                        return Opcode_struct{ .opcode = 34 };
+                    },
+                    0x0060 => {
+                        return Opcode_struct{ .opcode = 35 };
                     },
                     else => {
                         print("opcode not known: 0x{x} .. aborting\n", .{self.opcode});
                         return Opcode_struct{ .opcode = 0 };
                     },
-                }
-            },
-            0xA000 => { // ANNN: Sets I to the address NNN
-                // return Opcode_struct{ .opcode = 21, .NNN = NNN };
+                },
+                0x0008 => {
+                    return Opcode_struct{ .opcode = 30 };
+                },
+                0x000E => {
+                    return Opcode_struct{ .opcode = 31 };
+                },
+                0x0009 => {
+                    return Opcode_struct{ .opcode = 32 };
+                },
+                else => {
+                    print("opcode not known: 0x{x} .. aborting\n", .{self.opcode});
+                    return Opcode_struct{ .opcode = 0 };
+                },
             },
             else => {
                 print("opcode not known: 0x{x} .. aborting\n", .{self.opcode});
