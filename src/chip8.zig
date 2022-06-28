@@ -61,7 +61,6 @@ pub const Chip8 = struct {
         c8.PC = 0x200; // program counter starts at 0x200
         c8.opcode = 0; // reset current opcode
         c8.I = 0; // reset index register
-        c8.sp = 0; // reset stack pointer
         c8.gfx = std.mem.zeroes([64][32]u8); // clear dislay
         c8.stack.init(&c8.stack_buffer); // init the stack
         c8.stack_buffer = std.mem.zeroes([16]u16); // clear stack
@@ -292,6 +291,7 @@ pub const Chip8 = struct {
     fn execute(self: *Chip8, opcode: Opcode_struct) void {
         switch (opcode.opcode) {
             1 => { // 0NNN: call machine routine at addr NNN
+                self.PC = opcode.NNN;
             },
             2 => { // 00E0: clears the screen
                 self.drawFlag = true;
