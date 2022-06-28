@@ -199,38 +199,38 @@ pub const Chip8 = struct {
                 return Opcode_struct{ .opcode = 8, .X = @truncate(u4, opcode >> 8), .Y = @truncate(u4, opcode >> 4) };
             },
             0x6000 => { // 6XNN
-                return Opcode_struct{ .opcode = 9 };
+                return Opcode_struct{ .opcode = 9, .X = @truncate(u4, opcode >> 8), .NN = @truncate(u8, opcode) };
             },
             0x7000 => { // 7XNN
-                return Opcode_struct{ .opcode = 10 };
+                return Opcode_struct{ .opcode = 10, .X = @truncate(u4, opcode >> 8), .NN = @truncate(u8, opcode) };
             },
             0x8000 => switch (opcode & 0x000F) {
                 0x0000 => { // 8XY0
-                    return Opcode_struct{ .opcode = 11 };
+                    return Opcode_struct{ .opcode = 11, .X = @truncate(u4, opcode >> 8), .Y = @truncate(u4, opcode >> 4) };
                 },
                 0x0001 => { // 8XY1
-                    return Opcode_struct{ .opcode = 12 };
+                    return Opcode_struct{ .opcode = 12, .X = @truncate(u4, opcode >> 8), .Y = @truncate(u4, opcode >> 4) };
                 },
                 0x0002 => { // 8XY2
-                    return Opcode_struct{ .opcode = 13 };
+                    return Opcode_struct{ .opcode = 13, .X = @truncate(u4, opcode >> 8), .Y = @truncate(u4, opcode >> 4) };
                 },
                 0x0003 => { // 8XY3
-                    return Opcode_struct{ .opcode = 14 };
+                    return Opcode_struct{ .opcode = 14, .X = @truncate(u4, opcode >> 8), .Y = @truncate(u4, opcode >> 4) };
                 },
                 0x0004 => { // 8XY4
-                    return Opcode_struct{ .opcode = 15 };
+                    return Opcode_struct{ .opcode = 15, .X = @truncate(u4, opcode >> 8), .Y = @truncate(u4, opcode >> 4) };
                 },
                 0x0005 => { // 8XY5
-                    return Opcode_struct{ .opcode = 16 };
+                    return Opcode_struct{ .opcode = 16, .X = @truncate(u4, opcode >> 8), .Y = @truncate(u4, opcode >> 4) };
                 },
                 0x0006 => { // 8XY6
-                    return Opcode_struct{ .opcode = 17 };
+                    return Opcode_struct{ .opcode = 17, .X = @truncate(u4, opcode >> 8), .Y = @truncate(u4, opcode >> 4) };
                 },
                 0x0007 => { // 8XY7
-                    return Opcode_struct{ .opcode = 18 };
+                    return Opcode_struct{ .opcode = 18, .X = @truncate(u4, opcode >> 8), .Y = @truncate(u4, opcode >> 4) };
                 },
                 0x000E => { // 8XYE
-                    return Opcode_struct{ .opcode = 19 };
+                    return Opcode_struct{ .opcode = 19, .X = @truncate(u4, opcode >> 8), .Y = @truncate(u4, opcode >> 4) };
                 },
                 else => {
                     print("opcode not known: 0x{x} .. aborting\n", .{opcode});
@@ -238,26 +238,26 @@ pub const Chip8 = struct {
                 },
             },
             0x9000 => { // 9XY0
-                return Opcode_struct{ .opcode = 20 };
+                return Opcode_struct{ .opcode = 20, .X = @truncate(u4, opcode >> 8), .Y = @truncate(u4, opcode >> 4) };
             },
             0xA000 => { // ANNN
-                return Opcode_struct{ .opcode = 21 };
+                return Opcode_struct{ .opcode = 21, .NNN = @truncate(u12, opcode) };
             },
             0xB000 => { // BNNN
-                return Opcode_struct{ .opcode = 22 };
+                return Opcode_struct{ .opcode = 22, .NNN = @truncate(u12, opcode) };
             },
             0xC000 => { // CXNN
-                return Opcode_struct{ .opcode = 23 };
+                return Opcode_struct{ .opcode = 23, .X = @truncate(u4, opcode >> 8), .NN = @truncate(u8, opcode) };
             },
             0xD000 => { // DXYN
-                return Opcode_struct{ .opcode = 24 };
+                return Opcode_struct{ .opcode = 24, .X = @truncate(u4, opcode >> 8), .Y = @truncate(u4, opcode >> 4), .N = @truncate(u4, opcode) };
             },
             0xE000 => switch (opcode & 0x000F) {
                 0x000E => { // EX9E
-                    return Opcode_struct{ .opcode = 25 };
+                    return Opcode_struct{ .opcode = 25, .X = @truncate(u4, opcode >> 8) };
                 },
                 0x0001 => { // EXA1
-                    return Opcode_struct{ .opcode = 26 };
+                    return Opcode_struct{ .opcode = 26, .X = @truncate(u4, opcode >> 8) };
                 },
                 else => {
                     print("opcode not known: 0x{x} .. aborting\n", .{opcode});
@@ -266,23 +266,23 @@ pub const Chip8 = struct {
             },
             0xF000 => switch (opcode & 0x000F) {
                 0x0003 => { // FX33
-                    return Opcode_struct{ .opcode = 33 };
+                    return Opcode_struct{ .opcode = 33, .X = @truncate(u4, opcode >> 8) };
                 },
                 0x0007 => { // FX07
-                    return Opcode_struct{ .opcode = 27 };
+                    return Opcode_struct{ .opcode = 27, .X = @truncate(u4, opcode >> 8) };
                 },
                 0x000A => { // FX01
-                    return Opcode_struct{ .opcode = 28 };
+                    return Opcode_struct{ .opcode = 28, .X = @truncate(u4, opcode >> 8) };
                 },
                 0x0005 => switch (opcode & 0x00F0) {
                     0x0010 => { // FX15
-                        return Opcode_struct{ .opcode = 29 };
+                        return Opcode_struct{ .opcode = 29, .X = @truncate(u4, opcode >> 8) };
                     },
                     0x0050 => { // FX55
-                        return Opcode_struct{ .opcode = 34 };
+                        return Opcode_struct{ .opcode = 34, .X = @truncate(u4, opcode >> 8) };
                     },
                     0x0060 => { // FX65
-                        return Opcode_struct{ .opcode = 35 };
+                        return Opcode_struct{ .opcode = 35, .X = @truncate(u4, opcode >> 8) };
                     },
                     else => {
                         print("opcode not known: 0x{x} .. aborting\n", .{opcode});
@@ -290,13 +290,13 @@ pub const Chip8 = struct {
                     },
                 },
                 0x0008 => { // FX18
-                    return Opcode_struct{ .opcode = 30 };
+                    return Opcode_struct{ .opcode = 30, .X = @truncate(u4, opcode >> 8) };
                 },
                 0x000E => { // FX1E
-                    return Opcode_struct{ .opcode = 31 };
+                    return Opcode_struct{ .opcode = 31, .X = @truncate(u4, opcode >> 8) };
                 },
                 0x0009 => { // FX29
-                    return Opcode_struct{ .opcode = 32 };
+                    return Opcode_struct{ .opcode = 32, .X = @truncate(u4, opcode >> 8) };
                 },
                 else => {
                     print("opcode not known: 0x{x} .. aborting\n", .{opcode});
