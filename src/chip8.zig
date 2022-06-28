@@ -303,6 +303,7 @@ pub const Chip8 = struct {
                     print("Bad Address: returning to none\n", .{});
                     return;
                 };
+                self.PC += 2; // otherwise infinite loop BABY !
             },
             4 => { // 1NNN: jumps to addr NNN
                 self.PC = opcode.NNN;
@@ -365,8 +366,9 @@ pub const Chip8 = struct {
 
             },
             17 => { // 8XY6: stores the least significant bit of V[X] in VF and then shift V[X] to the right by 1
-                // Vx >>= 1
-
+                self.V[15] = self.V[opcode.X] & 0x0F;
+                self.V[opcode.X] >>= 1;
+                self.PC += 2;
             },
             18 => { // 8XY7: sets V[X] to V[Y] minux V[X], VF is set to 0 when borrow and 1 if not
                 // Vx = Vy - Vx
