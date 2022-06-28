@@ -1,5 +1,6 @@
 const std = @import("std");
 const fs = std.fs;
+const math = std.math;
 const print = std.debug.print;
 
 const Stack = @import("./stack.zig").Stack;
@@ -342,7 +343,6 @@ pub const Chip8 = struct {
                 self.PC += 2;
             },
             11 => { // 8XY0: setx V[X] to the value of V[Y]
-
                 self.V[opcode.X] += self.V[opcode.Y];
                 self.PC += 2;
             },
@@ -360,10 +360,18 @@ pub const Chip8 = struct {
                 self.PC += 2;
             },
             15 => { // 8XY4: adds V[Y] to V[X], VF is set to 1 if a carry or 0 if not
-                // v[x] += v[y]
+                self.V[15] = 0;
+                if (@addWithOverflow(u8, self.V[opcode.X], self.V[opcode.Y], &self.V[opcode.X])) {
+                    self.V[15] = 1;
+                }
+                self.PC += 2;
             },
             16 => { // 8XY5: V[Y] is subtracted from V[X], VF is set to 0 when borrow and 1 if not
-
+                self.V[15] = 0;
+                if (@subWithOverflow(u8, self.V[opcode.X], self.V[opcode.Y], &self.V[opcode.X])) {
+                    self.V[15] = 1;
+                }
+                self.PC += 2;
             },
             17 => { // 8XY6: stores the least significant bit of V[X] in VF and then shift V[X] to the right by 1
                 self.V[15] = self.V[opcode.X] & 0x0F;
@@ -371,7 +379,11 @@ pub const Chip8 = struct {
                 self.PC += 2;
             },
             18 => { // 8XY7: sets V[X] to V[Y] minux V[X], VF is set to 0 when borrow and 1 if not
-                // Vx = Vy - Vx
+                self.V[15] = 0;
+                if (@subWithOverflow(u8, self.V[opcode.Y], self.V[opcode.X], &self.V[opcode.X])) {
+                    self.V[15] = 1;
+                }
+                self.PC += 2;
             },
             19 => { // 8XYE: store the most significant bit of V[X] in VF and then shift V[X] to the left by 1
                 self.V[15] = self.V[opcode.X] & 0xF0;
@@ -389,12 +401,12 @@ pub const Chip8 = struct {
                 self.I = opcode.NNN;
                 self.PC += 2;
             },
-            22 => { // BNNN: jumps to the addr NNN + V[0], keep self.PC to the stack
+            22 => { // BNNN: jumps to the addr NNN + V[0]
                 self.PC = opcode.NNN + self.V[0];
             },
             23 => { // CXNN: sets V[X] to the result of a bitwise operation on a random number and NN
                 // Vx = rand() & NN
-
+                self.V[opcode.X] = std.rand.DefaultPrng.init(undefined).random().int(u8) & opcode.NN;
             },
             24 => { // DXYN: draw sprite at coordinate (Vx, Vy) width 8px height of N px,
                 // each row of 8px is read as bit-cded starting from memory[I],
@@ -410,19 +422,19 @@ pub const Chip8 = struct {
 
             },
             27 => { // FX07: sets V[X] to the value of the delay timer
-
+                self.V[opcode.X] = self.delay_timer;
             },
             28 => { // FX0A: A key press is awaited and then stored in V[X] (blocking)
 
             },
             29 => { // FX15: sets the delay_timer to V[X]
-
+                self.delay_timer = self.V[opcode.X];
             },
             30 => { // FX18: sets the sound_timer to V[X]
-
+                self.sound_timer = self.V[opcode.X];
             },
             31 => { // FX1E: adds V[X] to I
-                // self.I += self.V[X]
+                self.I += self.V[opcode.X];
             },
             32 => { // FX29: sets I tot he location of the sprite for the char in V[X], char O-F (in hex) are represented by a 4x5 font
 
