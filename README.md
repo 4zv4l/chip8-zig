@@ -15,3 +15,11 @@ $ xdd ./hex.content
 00000030: ea9e eba1 fc07 fd0a fe15 fa18 fb1e fc29  ...............)
 00000040: fd33 fe55 f265                           .3.U.e
 ```
+
+# todo
+[X] Load file to ram
+[X] Fetch opcode
+[X] Decode opcode
+[ ] Execute opcode
+[ ] Display (virtual screen)
+[ ] Input (virtual keyboard)
