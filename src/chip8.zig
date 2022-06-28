@@ -124,10 +124,6 @@ pub const Chip8 = struct {
         const opcode = self.decode();
         print("0x{X:0>4} =>", .{self.opcode});
         opcode.show();
-        self.PC += 2;
-        if (opcode.opcode == 35) { // quit after 35 opcodes (to test the 'hex.content' rom)
-            std.process.exit(0);
-        }
 
         // execute if call isn't 0 (not known opcode)
         if (opcode.opcode == 0) return error.UnknownOpcode;
@@ -296,8 +292,6 @@ pub const Chip8 = struct {
 
     /// execute opcode
     fn execute(self: *Chip8, opcode: Opcode_struct) void {
-        _ = self;
-        _ = opcode;
         switch (opcode.opcode) {
             1 => { // 0NNN: call machine routine at addr NNN
 
@@ -305,42 +299,63 @@ pub const Chip8 = struct {
             2 => { // 00E0: clears the screen
                 self.drawFlag = true;
                 self.gfx = std.mem.zeroes([64][32]u8);
+                self.PC += 2;
             },
             3 => { // 00EE: return from subroutine
 
             },
             4 => { // 1NNN: jumps to addr NNN
-
+                self.PC = opcode.NNN;
             },
             5 => { // 2NNN: calls subroutine at NNN
 
             },
             6 => { // 3XNN: skips the next instruction if V[X] equals NN
-
+                if (opcode.NN == self.V[opcode.X]) {
+                    self.PC += 4;
+                } else {
+                    self.PC += 2;
+                }
             },
             7 => { // 4XNN: skips the next instruction if V[X] is not equal NN
-
+                if (opcode.NN != self.V[opcode.X]) {
+                    self.PC += 4;
+                } else {
+                    self.PC += 2;
+                }
             },
             8 => { // 5XY0: skips the next instruction if V[X] equals V[Y]
-
+                if (self.V[opcode.X] == self.V[opcode.Y]) {
+                    self.PC += 4;
+                } else {
+                    self.PC += 2;
+                }
             },
             9 => { // 6XNN: sets V[X] to NN
-
+                self.V[opcode.X] = opcode.NN;
+                self.PC += 2;
             },
             10 => { // 7XNN: adds NN to V[X]
-
+                self.V[opcode.X] += opcode.NN;
+                self.PC += 2;
             },
             11 => { // 8XY0: setx V[X] to the value of V[Y]
 
+                self.V[opcode.X] += self.V[opcode.Y];
+                self.PC += 2;
             },
             12 => { // 8XY1: setx V[X] to V[X]|V[Y] (or bitwise)
                 // v[x] |= v[y]
+                self.V[opcode.X] |= self.V[opcode.Y];
+                self.PC += 2;
             },
             13 => { // 8XY2: sets V[X] to V[X]&V[Y] (and bitwise)
-
+                self.V[opcode.X] &= self.V[opcode.Y];
+                self.PC += 2;
             },
             14 => { // 8XY3: sets V[X] to V[X]^V[Y] (xor bitwise)
-
+                self.V[opcode.X] ^= self.V[opcode.Y];
+                self.PC += 2;
             },
             15 => { // 8XY4: adds V[Y] to V[X], VF is set to 1 if a carry or 0 if not
                 // v[x] += v[y]
@@ -356,23 +371,31 @@ pub const Chip8 = struct {
                 // Vx = Vy - Vx
             },
             19 => { // 8XYE: store the most significant bit of V[X] in VF and then shift V[X] to the left by 1
-                // Vx <<= 1
-
+                self.V[15] = self.V[opcode.X] & 0xF0;
+                self.V[opcode.X] <<= 1;
+                self.PC += 2;
             },
             20 => { // 9XY0: skips the next instruction if V[X] != V[Y]
-
+                if (self.V[opcode.X] != self.V[opcode.Y]) {
+                    self.PC += 4;
+                } else {
+                    self.PC += 2;
+                }
             },
             21 => { // ANNN: sets I to the addr NNN
-                self.I = self.opcode & 0x0FFF;
+                self.I = opcode.NNN;
+                self.PC += 2;
             },
             22 => { // BNNN: jumps to the addr NNN + V[0], keep self.PC to the stack
-
+                self.PC = opcode.NNN + self.V[0];
             },
             23 => { // CXNN: sets V[X] to the result of a bitwise operation on a random number and NN
                 // Vx = rand() & NN
 
             },
-            24 => { // DXYN: draw sprite at coordinate (Vx, Vy) width 8px height of N px, each row of 8px is read as bit-cded starting from memory[I], VF is set to 1 if any screen pixels are flipped from set to unset and to 0 if it doesn't happen
+            24 => { // DXYN: draw sprite at coordinate (Vx, Vy) width 8px height of N px,
+                // each row of 8px is read as bit-cded starting from memory[I],
+                // VF is set to 1 if any screen pixels are flipped from set to unset and to 0 if it doesn't happen
 
             },
             25 => { // EX9E: skips the next instruction if the key stored in V[X] is pressed
@@ -408,7 +431,9 @@ pub const Chip8 = struct {
             },
             35 => { // FX65:
             },
-            else => {},
+            else => {
+                return;
+            },
         }
     }
 };
