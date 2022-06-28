@@ -27,8 +27,6 @@ pub const Chip8 = struct {
     //stack: [16]u16 = undefined,
     stack_buffer: [16]u16 = undefined,
     stack: Stack(u16),
-    /// stack pointer
-    sp: u16 = undefined,
     /// keypad
     key: [16]u8 = undefined,
     /// draw flag
@@ -294,7 +292,6 @@ pub const Chip8 = struct {
     fn execute(self: *Chip8, opcode: Opcode_struct) void {
         switch (opcode.opcode) {
             1 => { // 0NNN: call machine routine at addr NNN
-
             },
             2 => { // 00E0: clears the screen
                 self.drawFlag = true;
