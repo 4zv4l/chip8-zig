@@ -2,6 +2,8 @@ const std = @import("std");
 const fs = std.fs;
 const print = std.debug.print;
 
+const stack = @import("./stack.zig");
+
 // two bytes long opcode (16 bits)
 const Opcode = u16;
 /// opcode design struct
@@ -43,7 +45,9 @@ pub const Chip8 = struct {
     delay_timer: u8 = undefined,
     sound_timer: u8 = undefined,
     /// stack
-    stack: [16]u16 = undefined,
+    //stack: [16]u16 = undefined,
+    stack_buffer: [16]u16 = undefined,
+    stack: stack.Stack(u16),
     /// stack pointer
     sp: u16 = undefined,
     /// keypad
@@ -76,14 +80,14 @@ pub const Chip8 = struct {
 
     /// initialize the chip8
     pub fn init() Chip8 {
-        // init registers and memory
         var c8 = std.mem.zeroes(Chip8);
         c8.PC = 0x200; // program counter starts at 0x200
         c8.opcode = 0; // reset current opcode
         c8.I = 0; // reset index register
         c8.sp = 0; // reset stack pointer
         c8.gfx = std.mem.zeroes([64][32]u8); // clear dislay
-        c8.stack = std.mem.zeroes([16]u16); // clear stack
+        c8.stack.init(&c8.stack_buffer); // init the stack
+        c8.stack_buffer = std.mem.zeroes([16]u16); // clear stack
         c8.V = std.mem.zeroes([16]u8); // clear registers V0-VF
         c8.memory = std.mem.zeroes([4096]u8); // clear ram
 
