@@ -2,30 +2,9 @@ const std = @import("std");
 const fs = std.fs;
 const print = std.debug.print;
 
-const stack = @import("./stack.zig");
-
-// two bytes long opcode (16 bits)
-const Opcode = u16;
-/// opcode design struct
-const Opcode_struct = struct {
-    /// opcode index
-    opcode: Opcode = 0,
-    /// 4bit constant
-    N: u4 = 0,
-    /// 8bit constant
-    NN: u8 = 0,
-    /// addr: 0x200-0xFFF
-    NNN: u12 = 0,
-    /// registers index
-    X: u4 = 0,
-    Y: u4 = 0,
-
-    /// format the Opcode_struct to show the different
-    /// components
-    pub fn show(self: Opcode_struct) void {
-        print("{{opcode: {d}, N: {x}, NN: {x}, NNN: {x}, X: {d}, Y: {d}}}\n", .{ self.opcode, self.N, self.NN, self.NNN, self.X, self.Y });
-    }
-};
+const Stack = @import("./stack.zig").Stack;
+const Opcode = @import("./opcode.zig").Opcode;
+const Opcode_struct = @import("./opcode.zig").Opcode_struct;
 
 pub const Chip8 = struct {
     /// opcode 2x8bits
@@ -47,7 +26,7 @@ pub const Chip8 = struct {
     /// stack
     //stack: [16]u16 = undefined,
     stack_buffer: [16]u16 = undefined,
-    stack: stack.Stack(u16),
+    stack: Stack(u16),
     /// stack pointer
     sp: u16 = undefined,
     /// keypad
