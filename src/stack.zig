@@ -26,7 +26,7 @@ pub fn Stack(comptime T: type) type {
 
         /// push a value to the stack
         pub fn push(self: *Self, value: T) void {
-            if (self.index < self.size) {
+            if (self.index < self.memory.len) {
                 self.memory[self.index] = value;
                 self.index += 1;
             }
