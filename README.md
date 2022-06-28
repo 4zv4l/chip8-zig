@@ -17,9 +17,9 @@ $ xdd ./hex.content
 ```
 
 # todo
-[X] Load file to ram
-[X] Fetch opcode
-[X] Decode opcode
-[ ] Execute opcode
-[ ] Display (virtual screen)
-[ ] Input (virtual keyboard)
+- [X] Load file to ram
+- [X] Fetch opcode
+- [X] Decode opcode
+- [ ] Execute opcode
+- [ ] Display (virtual screen)
+- [ ] Input (virtual keyboard)
