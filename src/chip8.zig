@@ -302,13 +302,17 @@ pub const Chip8 = struct {
                 self.PC += 2;
             },
             3 => { // 00EE: return from subroutine
-
+                self.PC = self.stack.pop() orelse {
+                    print("Bad Address: returning to none\n", .{});
+                    return;
+                };
             },
             4 => { // 1NNN: jumps to addr NNN
                 self.PC = opcode.NNN;
             },
             5 => { // 2NNN: calls subroutine at NNN
-
+                self.stack.push(self.PC);
+                self.PC = opcode.NNN;
             },
             6 => { // 3XNN: skips the next instruction if V[X] equals NN
                 if (opcode.NN == self.V[opcode.X]) {
