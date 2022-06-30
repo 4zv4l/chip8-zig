@@ -6,30 +6,32 @@ const print = std.debug.print;
 const Stack = @import("./stack.zig").Stack;
 const Opcode = @import("./opcode.zig").Opcode;
 const Opcode_struct = @import("./opcode.zig").Opcode_struct;
+const Screen = @import("./screen.zig");
+const Keyboard = @import("./keyboard.zig");
 
 pub const Chip8 = struct {
     /// opcode 2x8bits
-    opcode: Opcode = undefined,
+    opcode: Opcode,
     /// 4k of ram
-    memory: [4096]u8 = undefined,
+    memory: [4096]u8,
     /// 16 registers :: 8bits long
     /// V0 - VF
-    V: [16]u8 = undefined,
+    V: [16]u8,
     /// Index register from 0x000 to 0xFFF
-    I: u16 = undefined,
+    I: u16,
     /// Program Counter from 0x000 to 0xFFF
-    PC: u16 = undefined,
+    PC: u16,
     /// graphics 64x32
-    gfx: [64][32]u8 = undefined,
+    gfx: Screen.Display,
     // timers
-    delay_timer: u8 = undefined,
-    sound_timer: u8 = undefined,
+    delay_timer: u8,
+    sound_timer: u8,
     /// stack
     //stack: [16]u16 = undefined,
     stack_buffer: [16]u16 = undefined,
     stack: Stack(u16),
     /// keypad
-    key: [16]u8 = undefined,
+    key: Keyboard.Keys,
     /// draw flag
     drawFlag: bool = false,
 
@@ -53,20 +55,18 @@ pub const Chip8 = struct {
         0xF0, 0x80, 0xF0, 0x80, 0x80, // F
     };
 
-    pub fn setupGraphics() void {}
-    pub fn setupInput() void {}
-
     /// initialize the chip8
     pub fn init() Chip8 {
         var c8 = std.mem.zeroes(Chip8);
         c8.PC = 0x200; // program counter starts at 0x200
         c8.opcode = 0; // reset current opcode
         c8.I = 0; // reset index register
-        c8.gfx = std.mem.zeroes([64][32]u8); // clear dislay
+        c8.gfx = Screen.Display.init(); // clear, init the dislay
         c8.stack.init(&c8.stack_buffer); // init the stack
         c8.stack_buffer = std.mem.zeroes([16]u16); // clear stack
         c8.V = std.mem.zeroes([16]u8); // clear registers V0-VF
         c8.memory = std.mem.zeroes([4096]u8); // clear ram
+        c8.key = Keyboard.Keys.init(); // init keyboard
 
         // load fontset
         for (fontset) |c8_fs, i| {
@@ -137,10 +137,6 @@ pub const Chip8 = struct {
             }
             self.sound_timer -= 1;
         }
-    }
-
-    pub fn setKeys(self: *Chip8) void {
-        _ = self;
     }
 
     /// decode opcode
@@ -296,7 +292,7 @@ pub const Chip8 = struct {
             },
             2 => { // 00E0: clears the screen
                 self.drawFlag = true;
-                self.gfx = std.mem.zeroes([64][32]u8);
+                self.gfx.reset();
                 self.PC += 2;
             },
             3 => { // 00EE: return from subroutine
@@ -406,12 +402,14 @@ pub const Chip8 = struct {
             },
             23 => { // CXNN: sets V[X] to the result of a bitwise operation on a random number and NN
                 // Vx = rand() & NN
-                self.V[opcode.X] = std.rand.DefaultPrng.init(undefined).random().int(u8) & opcode.NN;
+                self.V[opcode.X] = undefined & opcode.NN;
+                self.PC += 2;
             },
             24 => { // DXYN: draw sprite at coordinate (Vx, Vy) width 8px height of N px,
                 // each row of 8px is read as bit-cded starting from memory[I],
                 // VF is set to 1 if any screen pixels are flipped from set to unset and to 0 if it doesn't happen
-
+                const bytes = self.memory[self.I .. self.I + opcode.N];
+                _ = bytes;
             },
             25 => { // EX9E: skips the next instruction if the key stored in V[X] is pressed
                 // if(key() == Vx)
@@ -423,18 +421,22 @@ pub const Chip8 = struct {
             },
             27 => { // FX07: sets V[X] to the value of the delay timer
                 self.V[opcode.X] = self.delay_timer;
+                self.PC += 2;
             },
             28 => { // FX0A: A key press is awaited and then stored in V[X] (blocking)
 
             },
             29 => { // FX15: sets the delay_timer to V[X]
                 self.delay_timer = self.V[opcode.X];
+                self.PC += 2;
             },
             30 => { // FX18: sets the sound_timer to V[X]
                 self.sound_timer = self.V[opcode.X];
+                self.PC += 2;
             },
             31 => { // FX1E: adds V[X] to I
                 self.I += self.V[opcode.X];
+                self.PC += 2;
             },
             32 => { // FX29: sets I tot he location of the sprite for the char in V[X], char O-F (in hex) are represented by a 4x5 font
 
