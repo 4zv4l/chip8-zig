@@ -413,7 +413,7 @@ pub const Chip8 = struct {
 
                 // set the pixels
                 while (counter != opcode.N) : (counter += 1) {
-                    if (self.gfx.set(self.memory[self.I + counter], opcode.X + counter, opcode.Y)) {
+                    if (self.gfx.set(self.memory[self.I + counter], self.V[opcode.X], (self.V[opcode.Y] + counter) % self.gfx.y_size)) {
                         self.V[15] = 1;
                     }
                 }
