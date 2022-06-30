@@ -116,12 +116,12 @@ pub const Chip8 = struct {
         // fetch
         self.opcode = @as(u16, self.memory[self.PC]) << 8; // AAAA 0000
         self.opcode |= self.memory[self.PC + 1]; // AAAA BBBB
-        print("fetched: 0x{X}\n", .{self.opcode});
+        // print("fetched: 0x{X}\n", .{self.opcode});
 
         // decode opcode
         const opcode = self.decode();
-        print("0x{X:0>4} =>", .{self.opcode});
-        opcode.show();
+        // print("0x{X:0>4} =>", .{self.opcode});
+        // opcode.show();
 
         // execute if call isn't 0 (not known opcode)
         if (opcode.opcode == 0) return error.UnknownOpcode;
@@ -406,18 +406,36 @@ pub const Chip8 = struct {
                 self.PC += 2;
             },
             24 => { // DXYN: draw sprite at coordinate (Vx, Vy) width 8px height of N px,
-                // each row of 8px is read as bit-cded starting from memory[I],
+                // each row of 8px is read as bit-coded starting from memory[I],
                 // VF is set to 1 if any screen pixels are flipped from set to unset and to 0 if it doesn't happen
-                const bytes = self.memory[self.I .. self.I + opcode.N];
-                _ = bytes;
+                self.V[15] = 0;
+                var counter: u4 = 0;
+
+                // set the pixels
+                while (counter != opcode.N) : (counter += 1) {
+                    if (self.gfx.set(self.memory[self.I + counter], opcode.X + counter, opcode.Y)) {
+                        self.V[15] = 1;
+                    }
+                }
+
+                // refresh the display
+                self.gfx.draw();
+
+                self.PC += 2;
             },
             25 => { // EX9E: skips the next instruction if the key stored in V[X] is pressed
                 // if(key() == Vx)
-
+                if (self.key.isPressed(self.V[opcode.X])) {
+                    self.PC += 4;
+                }
+                self.PC += 2;
             },
             26 => { // EXA1: skips the next instruction if the key stored in V[X] is not pressed
                 // if(key() != Vx)
-
+                if (!self.key.isPressed(self.V[opcode.X])) {
+                    self.PC += 4;
+                }
+                self.PC += 2;
             },
             27 => { // FX07: sets V[X] to the value of the delay timer
                 self.V[opcode.X] = self.delay_timer;
