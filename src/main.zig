@@ -22,6 +22,8 @@ pub fn main() void {
         return;
     }
 
+    ///////////////// START HERE
+
     // init and load program in the ram
     var myChip8 = chip8.Chip8.init();
     myChip8.load(allocator, argv[1]) catch |e| {
@@ -35,13 +37,5 @@ pub fn main() void {
             print("{e}\n", .{e});
             return;
         };
-
-        // draw if needed
-        if (myChip8.drawFlag) {
-            //draw(myChip8.gfx);
-        }
-
-        // store key press state (press and release)
-        // myChip8.setKeys();
     }
 }
