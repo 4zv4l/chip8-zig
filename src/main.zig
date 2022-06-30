@@ -42,6 +42,6 @@ pub fn main() void {
         }
 
         // store key press state (press and release)
-        myChip8.setKeys();
+        // myChip8.setKeys();
     }
 }
