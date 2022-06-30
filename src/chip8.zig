@@ -116,12 +116,12 @@ pub const Chip8 = struct {
         // fetch
         self.opcode = @as(u16, self.memory[self.PC]) << 8; // AAAA 0000
         self.opcode |= self.memory[self.PC + 1]; // AAAA BBBB
-        // print("fetched: 0x{X}\n", .{self.opcode});
+        print("fetched: 0x{X}\n", .{self.opcode});
 
         // decode opcode
         const opcode = self.decode();
-        // print("0x{X:0>4} =>", .{self.opcode});
-        // opcode.show();
+        print("0x{X:0>4} =>", .{self.opcode});
+        opcode.show();
 
         // execute if call isn't 0 (not known opcode)
         if (opcode.opcode == 0) return error.UnknownOpcode;
@@ -425,6 +425,7 @@ pub const Chip8 = struct {
             },
             25 => { // EX9E: skips the next instruction if the key stored in V[X] is pressed
                 // if(key() == Vx)
+                // TODO
                 if (self.key.isPressed(self.V[opcode.X])) {
                     self.PC += 4;
                 }
@@ -432,6 +433,7 @@ pub const Chip8 = struct {
             },
             26 => { // EXA1: skips the next instruction if the key stored in V[X] is not pressed
                 // if(key() != Vx)
+                // TODO
                 if (!self.key.isPressed(self.V[opcode.X])) {
                     self.PC += 4;
                 }
@@ -442,6 +444,7 @@ pub const Chip8 = struct {
                 self.PC += 2;
             },
             28 => { // FX0A: A key press is awaited and then stored in V[X] (blocking)
+                // TODO
 
             },
             29 => { // FX15: sets the delay_timer to V[X]
@@ -457,14 +460,28 @@ pub const Chip8 = struct {
                 self.PC += 2;
             },
             32 => { // FX29: sets I tot he location of the sprite for the char in V[X], char O-F (in hex) are represented by a 4x5 font
-
+                // The value of I is set to the location for the hexadecimal sprite corresponding to the value of Vx.
+                // See section 2.4, Display, for more information on the Chip-8 hexadecimal font.
+                // TODO
+                self.I = self.V[opcode.X];
+                self.PC += 2;
             },
-            33 => { // FX33:
-
+            33 => { // FX33: Store BCD representation of Vx in memory locations I, I+1, and I+2.
+                //The interpreter takes the decimal value of Vx,
+                //and places the hundreds digit in memory at location in I, the tens digit at location I+1, and the ones digit at location I+2.
+                //TODO                              // if: 548
+                self.memory[self.I] = self.V[opcode.X]; // 5
+                self.memory[self.I + 1] = self.V[opcode.X]; // 4
+                self.memory[self.I + 2] = self.V[opcode.X]; // 8
+                self.PC += 2;
             },
-            34 => { // FX55:
+            34 => { // FX55: Store registers V0 through Vx in memory starting at location I.
+                // The interpreter copies the values of registers V0 through Vx into memory, starting at the address in I.
+                // TODO
             },
-            35 => { // FX65:
+            35 => { // FX65: Read registers V0 through Vx from memory starting at location I.
+                // The interpreter reads values from memory starting at location I into registers V0 through Vx.
+                // TODO
             },
             else => {
                 return;

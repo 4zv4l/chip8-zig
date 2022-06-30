@@ -5,6 +5,7 @@ pub const Display = struct {
     x_size: u8 = 64,
     y_size: u8 = 32,
     screen: [64][32]u8 = undefined,
+    stdout: std.io.Writer(std.fs.File, std.os.WriteError, std.fs.File.write) = std.io.getStdOut().writer(),
 
     pub fn init() Display {
         var display = Display{};
@@ -15,17 +16,17 @@ pub const Display = struct {
     /// draw on the screen (refresh)
     /// ████████████████████████████████
     pub fn draw(self: Display) void {
-        print("\x1Bc", .{});
+        self.stdout.print("\x1Bc", .{}) catch {};
         var i: u8 = 0;
         var j: u8 = 0;
         while (i < self.x_size) : (i += 1) {
             while (j < self.y_size) : (j += 1) {
                 if (self.screen[i][j] > 0) {
-                    print("█", .{});
+                    self.stdout.print("⬜", .{}) catch {};
                 }
             }
             j = 0;
-            print("\n", .{});
+            self.stdout.print("\n", .{}) catch {};
         }
     }
 
