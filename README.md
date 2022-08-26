@@ -20,6 +20,6 @@ $ xdd ./hex.content
 - [X] Load file to ram
 - [X] Fetch opcode
 - [X] Decode opcode
-- [ ] Execute opcode
+- [X] Execute opcode
 - [ ] Display (virtual screen)
 - [ ] Input (virtual keyboard)
